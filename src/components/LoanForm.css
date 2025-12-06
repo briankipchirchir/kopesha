@@ -1,0 +1,214 @@
+/* ---------- Form Styles ---------- */
+.form-container {
+  max-width: 500px;
+  width: 90%;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #e2ebe5; /* light background */
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+}
+
+.form-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1e293b;
+  text-align: center;
+}
+
+.eligibility-info p,
+.benefits-text {
+  font-size: 0.95rem;
+  color: #334155;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+
+.error-text {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.form-input.error,
+.form-select.error {
+  border: 1px solid red;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #2563eb;
+}
+
+/* ---------- Terms & Privacy ---------- */
+.terms-link {
+  color: #3b82f6;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.terms-link:hover {
+  color: #2563eb;
+}
+
+.terms-section,
+.privacy-section {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-align: center;
+}
+
+/* ---------- Modal Styles ---------- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.75); /* dark overlay */
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 3rem;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-content {
+  background: #ffffff;
+  max-width: 500px;
+  width: 100%;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  position: relative;
+  animation: slideIn 0.3s ease-in-out;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.left-modal {
+  margin-left: 2rem; /* left side alignment on desktop */
+}
+
+.modal-body {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #64748b;
+  transition: color 0.3s;
+}
+
+.close-btn:hover {
+  color: #1e293b;
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Optional scrollbar styling for modal content */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: rgba(59, 130, 246, 0.5);
+  border-radius: 3px;
+}
+
+/* ---------- Responsive Styles ---------- */
+@media (max-width: 640px) {
+  .form-container {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .modal-overlay {
+    padding: 1rem;
+    align-items: center; /* center modal vertically */
+    justify-content: center; /* center modal horizontally */
+  }
+
+  .left-modal {
+    margin-left: 0; /* center modal on mobile */
+  }
+
+  .modal-content {
+    max-width: 95%;
+    padding: 1.5rem;
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+  }
+
+  .submit-btn {
+    padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+
+  .eligibility-info p,
+  .benefits-text,
+  .terms-section,
+  .privacy-section {
+    font-size: 0.85rem;
+  }
+}
+
