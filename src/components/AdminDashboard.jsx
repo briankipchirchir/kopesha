@@ -32,7 +32,7 @@ const currentLoans = loans.slice(indexOfFirstLoan, indexOfLastLoan);
     if (!window.confirm("Are you sure you want to delete this loan?")) return;
 
     try {
-      const res = await fetch(`https://kopesha-backend-3.onrender.com/api/delete/${trackingId}`, {
+      const res = await fetch(`https://kopesha-backend-3.onrender.com/api/loans/delete/${trackingId}`, {
         method: "DELETE"
       });
 
@@ -145,18 +145,7 @@ const currentLoans = loans.slice(indexOfFirstLoan, indexOfLastLoan);
         </table>
       </div>
 
-      <div className="pagination">
-  {Array.from({ length: Math.ceil(loans.length / loansPerPage) }, (_, i) => (
-    <button
-      key={i + 1}
-      onClick={() => setCurrentPage(i + 1)}
-      className={currentPage === i + 1 ? "active-page" : ""}
-    >
-      {i + 1}
-    </button>
-  ))}
-</div>
-
+      
     </div>
   );
 }
