@@ -30,6 +30,9 @@ const currentLoans = loans.slice(indexOfFirstLoan, indexOfLastLoan);
 
     const handleDelete = async (trackingId) => {
     if (!window.confirm("Are you sure you want to delete this loan?")) return;
+    System.out.println("Deleting: " + trackingId);
+System.out.println("Found loan? " + loanOptional.isPresent());
+
 
     try {
       const res = await fetch(`https://kopesha-backend-3.onrender.com/api/loans/delete/${trackingId}`, {
