@@ -5,6 +5,15 @@ export default function AdminDashboard() {
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1);
+const [loansPerPage] = useState(10); // Show 10 loans per page
+
+
+const indexOfLastLoan = currentPage * loansPerPage;
+const indexOfFirstLoan = indexOfLastLoan - loansPerPage;
+const currentLoans = loans.slice(indexOfFirstLoan, indexOfLastLoan);
+
+
   useEffect(() => {
     fetch("https://kopesha-backend-3.onrender.com/api/loans/all")
       .then(res => res.json())
@@ -17,6 +26,30 @@ export default function AdminDashboard() {
         setLoading(false);
       });
   }, []);
+
+
+    const handleDelete = async (trackingId) => {
+    if (!window.confirm("Are you sure you want to delete this loan?")) return;
+
+    try {
+      const res = await fetch(`https://kopesha-backend-3.onrender.com/api/delete/${trackingId}`, {
+        method: "DELETE"
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(`Loan ${trackingId} deleted successfully`);
+        // Remove the deleted loan from state
+        setLoans(loans.filter(loan => loan.trackingId !== trackingId));
+      } else {
+        alert(data.error || "Failed to delete loan");
+      }
+    } catch (err) {
+      console.error("Error deleting loan:", err);
+      alert("Error deleting loan. Check console.");
+    }
+  };
 
   // Calculate totals - Only count PAID loans
   const calculateTotals = () => {
@@ -77,30 +110,53 @@ export default function AdminDashboard() {
               <th>Verification Fee</th>
               <th>Status</th>
               <th>Tracking ID</th>
+               <th>Action</th>
             </tr>
           </thead>
 
           <tbody>
-            {loans.map((loan) => (
-              <tr key={loan.id}>
-                <td>{loan.id}</td>
-                <td>{loan.name}</td>
-                <td>{loan.phone}</td>
-                <td>{loan.idNumber}</td>
-                <td>{loan.loanType}</td>
-                <td>Ksh {loan.loanAmount.toLocaleString()}</td>
-                <td>Ksh {loan.verificationFee}</td>
-                <td>
-                  <span className={`status ${loan.status.toLowerCase()}`}>
-                    {loan.status}
-                  </span>
-                </td>
-                <td>{loan.trackingId}</td>
-              </tr>
-            ))}
+            {currentLoans.map((loan) => (
+  <tr key={loan.id}>
+    <td>{loan.id}</td>
+    <td>{loan.name}</td>
+    <td>{loan.phone}</td>
+    <td>{loan.idNumber}</td>
+    <td>{loan.loanType}</td>
+    <td>Ksh {loan.loanAmount.toLocaleString()}</td>
+    <td>Ksh {loan.verificationFee}</td>
+    <td>
+      <span className={`status ${loan.status.toLowerCase()}`}>
+        {loan.status}
+      </span>
+    </td>
+    <td>{loan.trackingId}</td>
+    <td>
+      <button
+        className="delete-btn"
+        onClick={() => handleDelete(loan.trackingId)}
+      >
+        Delete
+      </button>
+    </td>
+  </tr>
+))}
+
           </tbody>
         </table>
       </div>
+
+      <div className="pagination">
+  {Array.from({ length: Math.ceil(loans.length / loansPerPage) }, (_, i) => (
+    <button
+      key={i + 1}
+      onClick={() => setCurrentPage(i + 1)}
+      className={currentPage === i + 1 ? "active-page" : ""}
+    >
+      {i + 1}
+    </button>
+  ))}
+</div>
+
     </div>
   );
 }
