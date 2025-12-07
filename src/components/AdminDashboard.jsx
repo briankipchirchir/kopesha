@@ -6,7 +6,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/loans/all")
+    fetch("http://kopesha-backend-3.onrender.com/api/loans/all")
       .then(res => res.json())
       .then(data => {
         setLoans(data);

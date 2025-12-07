@@ -38,7 +38,7 @@ const LoanApproval = () => {
       setPaymentStatus('pending');
 
       // Initiate STK Push
-      const response = await fetch('http://localhost:8080/api/loans/stk-push', {
+      const response = await fetch('http://kopesha-backend-3.onrender.com/api/loans/stk-push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -74,7 +74,7 @@ const LoanApproval = () => {
         pollCount++;
         try {
           const statusRes = await fetch(
-            `http://localhost:8080/api/loans/mpesa/status/${requestID}`
+            `http://kopesha-backend-3.onrender.com/api/loans/mpesa/status/${requestID}`
           );
 
           if (!statusRes.ok) return;

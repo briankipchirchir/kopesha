@@ -9,7 +9,7 @@ const LoanHomepage = () => {
 
   // Fetch latest 10 applications
   useEffect(() => {
-    fetch("http://localhost:8080/api/loans/all")
+    fetch("http://kopesha-backend-3.onrender.com/api/loans/all")
       .then(res => res.json())
       .then(data => {
         const sorted = data.sort((a, b) => b.id - a.id).slice(0, 100);
