@@ -192,10 +192,28 @@
     padding: 20px 15px;
   }
   .loan-options {
-    grid-template-columns: 1fr; /* Stack cards full-width */
+    grid-template-columns: 1fr; /* stack cards vertically */
+    gap: 8px;
   }
 
   .loan-option-card {
-    padding: 12px;
+    padding: 10px;
+    font-size: 14px;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .loan-option-card div {
+    margin-bottom: 4px;
+  }
+
+  .loan-option-card strong {
+    font-size: 16px;
+  }
+
+  .loan-option-card p {
+    font-size: 12px;
+    margin: 0;
+    line-height: 1.3;
   }
 }
