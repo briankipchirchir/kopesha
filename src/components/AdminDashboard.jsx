@@ -27,32 +27,34 @@ const currentLoans = loans.slice(indexOfFirstLoan, indexOfLastLoan);
       });
   }, []);
 
+const handleDelete = async (trackingId) => {
+  if (!window.confirm("Are you sure you want to delete this loan?")) return;
 
-    const handleDelete = async (trackingId) => {
-    if (!window.confirm("Are you sure you want to delete this loan?")) return;
-    System.out.println("Deleting: " + trackingId);
-System.out.println("Found loan? " + loanOptional.isPresent());
+  // Replace System.out.println with console.log
+  console.log("Deleting: " + trackingId);
 
+  // Remove or replace loanOptional logic; if you just want to log, you can do:
+  const loanFound = loans.find(loan => loan.trackingId === trackingId);
+  console.log("Found loan?", !!loanFound);
 
-    try {
-      const res = await fetch(`https://kopesha-backend-3.onrender.com/api/loans/delete/${trackingId}`, {
-        method: "DELETE"
-      });
+  try {
+    const res = await fetch(`https://kopesha-backend-3.onrender.com/api/loans/delete/${trackingId}`, {
+      method: "DELETE"
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (res.ok) {
-        alert(`Loan ${trackingId} deleted successfully`);
-        // Remove the deleted loan from state
-        setLoans(loans.filter(loan => loan.trackingId !== trackingId));
-      } else {
-        alert(data.error || "Failed to delete loan");
-      }
-    } catch (err) {
-      console.error("Error deleting loan:", err);
-      alert("Error deleting loan. Check console.");
+    if (res.ok) {
+      alert(`Loan ${trackingId} deleted successfully`);
+      setLoans(loans.filter(loan => loan.trackingId !== trackingId));
+    } else {
+      alert(data.error || "Failed to delete loan");
     }
-  };
+  } catch (err) {
+    console.error("Error deleting loan:", err);
+    alert("Error deleting loan. Check console.");
+  }
+};
 
   // Calculate totals - Only count PAID loans
   const calculateTotals = () => {

@@ -18,7 +18,7 @@ const LoanApproval = () => {
     {
       id: 1,
       amount: 2000,
-      veriicationFee: 100,
+      verificationFee: 100,
       duration: '2 months',
       interest: '10%',
     },
