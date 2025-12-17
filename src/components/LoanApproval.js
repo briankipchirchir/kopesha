@@ -5,20 +5,73 @@ import '../styles/LoanApproval.css';
 const LoanApproval = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
   const isPollingRef = useRef(false);
 
   const formData = location.state || {};
-  const loanAmount = formData.loanAmount || 0;
-  const verificationFee = formData.verificationFee || 0;
   const trackingId = formData.trackingId || 'N/A';
 
+  /* ---------------- LOAN OPTIONS ---------------- */
+  const loanOffers = [
+    {
+      id: 1,
+      amount: 2000,
+      veriicationFee: 100,
+      duration: '2 months',
+      interest: '10%',
+    },
+      {
+      id: 2,
+      amount: 3000,
+      verificationFee: 150,
+      duration: '2 months',
+      interest: '10%',
+    },
+      {
+      id: 3,
+      amount: 4000,
+      verificationFee: 190,
+      duration: '2 months',
+      interest: '10%',
+    },
+      {
+      id: 4,
+      amount: 5000,
+      verificationFee: 200,
+      duration: '2 months',
+      interest: '10%',
+    },
+      {
+      id: 5,
+      amount: 6000,
+      verificationFee: 240,
+      duration: '2 months',
+      interest: '10%',
+    },
+    {
+      id: 6,
+      amount: 10000,
+      verificationFee: 350,
+      duration: '3 months',
+      interest: '12%',
+    },
+    {
+      id: 7,
+      amount: 20000,
+      verificationFee: 600,
+      duration: '4 months',
+      interest: '15%',
+    },
+  ];
+
+  const [selectedLoan, setSelectedLoan] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutRequestID, setCheckoutRequestID] = useState(null);
 
-  // Cleanup intervals on unmount
+  /* ---------------- CLEANUP ---------------- */
   useEffect(() => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -26,8 +79,14 @@ const LoanApproval = () => {
     };
   }, []);
 
+  /* ---------------- HANDLE LOAN PAYMENT ---------------- */
   const handleGetLoan = async () => {
-    if (isPollingRef.current) return; // Prevent multiple calls
+    if (!selectedLoan) {
+      alert('Please select a loan option');
+      return;
+    }
+
+    if (isPollingRef.current) return;
 
     try {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -37,41 +96,38 @@ const LoanApproval = () => {
       setIsLoading(true);
       setPaymentStatus('pending');
 
-      // Initiate STK Push
-      const response = await fetch('https://kopesha-backend-3.onrender.com/api/loans/stk-push', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          trackingId: trackingId,
-          phone: formData.phone,
-          amount: verificationFee,
-        }),
-      });
+      const response = await fetch(
+        'https://kopesha-backend-3.onrender.com/api/loans/stk-push',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            trackingId,
+            phone: formData.phone,
+            amount: selectedLoan.verificationFee,
+          }),
+        }
+      );
 
-      const dataText = await response.text();
-      const data = JSON.parse(dataText);
+      const data = JSON.parse(await response.text());
       const requestID = data.CheckoutRequestID;
 
       if (!requestID) {
         setPaymentStatus('failed');
         setIsLoading(false);
         isPollingRef.current = false;
-        alert('STK Push initiated, but no CheckoutRequestID received.');
+        alert('STK Push initiated but no CheckoutRequestID received');
         return;
       }
 
       setCheckoutRequestID(requestID);
 
-      // Small delay to ensure backend saved PENDING status
-      await new Promise(res => setTimeout(res, 500));
-
-      console.log('Starting to poll for:', requestID);
-
       let pollCount = 0;
-      const maxPolls = 100; // 5 minutes max
+      const maxPolls = 100;
 
       intervalRef.current = setInterval(async () => {
         pollCount++;
+
         try {
           const statusRes = await fetch(
             `https://kopesha-backend-3.onrender.com/api/loans/mpesa/status/${requestID}`
@@ -80,7 +136,6 @@ const LoanApproval = () => {
           if (!statusRes.ok) return;
 
           const statusData = await statusRes.json();
-          console.log('Status response:', statusData);
 
           switch (statusData.status) {
             case 'PENDING':
@@ -111,11 +166,10 @@ const LoanApproval = () => {
               break;
           }
         } catch (err) {
-          console.error('Error checking payment status:', err);
+          console.error('Status check error:', err);
         }
 
         if (pollCount >= maxPolls) {
-          console.warn('Max polling attempts reached');
           setPaymentStatus('timeout');
           clearInterval(intervalRef.current);
           isPollingRef.current = false;
@@ -123,35 +177,28 @@ const LoanApproval = () => {
         }
       }, 3000);
 
-      // Timeout after 5 minutes
       timeoutRef.current = setTimeout(() => {
-        console.warn('Polling timeout reached');
         clearInterval(intervalRef.current);
         setPaymentStatus('timeout');
         isPollingRef.current = false;
         setIsLoading(false);
-      }, 300000); // 5 minutes
+      }, 300000);
 
     } catch (error) {
-      console.error('Error initiating STK Push:', error);
+      console.error('STK Push error:', error);
       setPaymentStatus('failed');
       setIsLoading(false);
       isPollingRef.current = false;
     }
   };
 
-
-
-useEffect(() => {
-  if (paymentStatus && paymentStatus !== 'pending') {
-    const timer = setTimeout(() => {
-      setPaymentStatus('');
-    }, 5000); 
-
-    return () => clearTimeout(timer); 
-  }
-}, [paymentStatus]);
-
+  /* ---------------- AUTO CLEAR STATUS ---------------- */
+  useEffect(() => {
+    if (paymentStatus && paymentStatus !== 'pending') {
+      const timer = setTimeout(() => setPaymentStatus(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentStatus]);
 
   const handleGoBack = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -162,13 +209,13 @@ useEffect(() => {
   const renderStatusMessage = () => {
     switch (paymentStatus) {
       case 'pending':
-        return <p>Waiting for payment... (STK prompt sent to your phone)</p>;
+        return <p>Waiting for payment... (STK prompt sent)</p>;
       case 'success':
-        return <p style={{ color: 'green' }}>Payment Successful ✅ Your loan will be processed within 24 hours.</p>;
+        return <p style={{ color: 'green' }}>Payment Successful ✅ Loan processing started.</p>;
       case 'cancelled':
-        return <p style={{ color: 'red' }}>Payment Cancelled by user❌</p>;
+        return <p style={{ color: 'red' }}>Payment Cancelled ❌</p>;
       case 'timeout':
-        return <p style={{ color: 'orange' }}>Request Timeout - Please try again</p>;
+        return <p style={{ color: 'orange' }}>Request Timeout</p>;
       case 'failed':
         return <p style={{ color: 'red' }}>Payment Failed ❌</p>;
       default:
@@ -176,45 +223,69 @@ useEffect(() => {
     }
   };
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="approval-container">
       <div className="approval-card">
+
         <div className="approval-header">
           <p>
-            Hi {formData.name || 'User'}, you have qualified for a Loan of Ksh. {loanAmount.toLocaleString()}.
-            Your loan repayment period is 2 months with a 10% interest rate. Terms and conditions apply.
+            Hi {formData.name || 'User'}, select a loan option below.
+            Terms and conditions apply.
           </p>
         </div>
 
         <div className="approval-body">
+
+          {/* -------- LOAN OPTIONS -------- */}
+          <div className="loan-options">
+            <h4>Select a loan option</h4>
+
+            {loanOffers.map((offer) => (
+              <div
+                key={offer.id}
+                className={`loan-option-card ${
+                  selectedLoan?.id === offer.id ? 'selected' : ''
+                }`}
+                onClick={() => setSelectedLoan(offer)}
+              >
+                <div>
+                  <strong>Ksh. {offer.amount.toLocaleString()}</strong>
+                  <p>Duration: {offer.duration}</p>
+                  <p>Interest: {offer.interest}</p>
+                </div>
+
+                <div>
+                  Verification Fee: <strong>Ksh. {offer.verificationFee}</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* -------- SUMMARY -------- */}
           <div className="approval-table">
             <div className="approval-row">
               <span className="approval-label">Loan Tracking ID:</span>
               <span className="approval-value">{trackingId}</span>
             </div>
-            <div className="approval-row">
-              <span className="approval-label">Your Name:</span>
-              <span className="approval-value">{formData.name || 'N/A'}</span>
-            </div>
+
             <div className="approval-row">
               <span className="approval-label">MPESA Number:</span>
               <span className="approval-value">{formData.phone || 'N/A'}</span>
             </div>
+
             <div className="approval-row">
-              <span className="approval-label">ID Number:</span>
-              <span className="approval-value">{formData.idNumber || 'N/A'}</span>
+              <span className="approval-label">Selected Loan:</span>
+              <span className="approval-value">
+                {selectedLoan ? `Ksh. ${selectedLoan.amount.toLocaleString()}` : 'None'}
+              </span>
             </div>
-            <div className="approval-row">
-              <span className="approval-label">Loan Type:</span>
-              <span className="approval-value">{formData.loanType || 'N/A'}</span>
-            </div>
-            <div className="approval-row">
-              <span className="approval-label">Qualified Loan:</span>
-              <span className="approval-value">Ksh. {loanAmount.toLocaleString()}</span>
-            </div>
+
             <div className="approval-row">
               <span className="approval-label">Verification Fee:</span>
-              <span className="approval-value">Ksh. {verificationFee}</span>
+              <span className="approval-value">
+                {selectedLoan ? `Ksh. ${selectedLoan.verificationFee}` : '-'}
+              </span>
             </div>
           </div>
 
@@ -224,16 +295,17 @@ useEffect(() => {
             <button
               onClick={handleGetLoan}
               className="get-loan-btn"
-              disabled={isLoading || paymentStatus === 'success'}
+              disabled={isLoading || !selectedLoan || paymentStatus === 'success'}
             >
               {isLoading ? 'Processing...' : 'Get Loan Now'}
             </button>
 
             <div className="approval-footer-text">
               © 2025. All rights reserved. Go back{' '}
-              <a onClick={handleGoBack} style={{ cursor: 'pointer' }}>home</a>
+              <span onClick={handleGoBack} style={{ cursor: 'pointer' }}>home</span>
             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -241,3 +313,4 @@ useEffect(() => {
 };
 
 export default LoanApproval;
+

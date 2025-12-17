@@ -138,6 +138,35 @@
 .approval-footer-text a:hover {
   text-decoration: underline;
 }
+.loan-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.loan-option-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: white;
+}
+
+.loan-option-card div {
+  margin-bottom: 8px;
+}
+
+.loan-option-card.selected {
+  border-color: #0066cc;
+  background: #f0f7ff;
+}
+
+
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -161,5 +190,12 @@
   .approval-header {
     font-size: 14px;
     padding: 20px 15px;
+  }
+  .loan-options {
+    grid-template-columns: 1fr; /* Stack cards full-width */
+  }
+
+  .loan-option-card {
+    padding: 12px;
   }
 }
