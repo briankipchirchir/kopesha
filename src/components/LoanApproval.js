@@ -110,7 +110,7 @@ const LoanApproval = () => {
       );
 
       const data = JSON.parse(await response.text());
-      const requestID = data.CheckoutRequestID;
+      const requestID = data.checkoutRequestID;
 
       if (!requestID) {
         setPaymentStatus('failed');
