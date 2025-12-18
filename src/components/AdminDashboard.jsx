@@ -76,6 +76,13 @@ const handleDelete = async (trackingId) => {
 
   const { totalVerificationFees, totalLoanAmount, successfulPayments, totalApplications } = calculateTotals();
 
+  const totalPages = Math.ceil(loans.length / loansPerPage);
+  const goToPage = (pageNumber) => {
+  setCurrentPage(pageNumber);
+};
+
+
+
   return (
     <div className="admin-container">
       <h2 className="dashboard-title">Loan Applications Dashboard</h2>
@@ -148,6 +155,33 @@ const handleDelete = async (trackingId) => {
 
           </tbody>
         </table>
+
+        <div className="pagination">
+  <button
+    disabled={currentPage === 1}
+    onClick={() => setCurrentPage(currentPage - 1)}
+  >
+    Prev
+  </button>
+
+  {[...Array(totalPages)].map((_, index) => (
+    <button
+      key={index}
+      className={currentPage === index + 1 ? "active" : ""}
+      onClick={() => goToPage(index + 1)}
+    >
+      {index + 1}
+    </button>
+  ))}
+
+  <button
+    disabled={currentPage === totalPages}
+    onClick={() => setCurrentPage(currentPage + 1)}
+  >
+    Next
+  </button>
+</div>
+
       </div>
 
       
