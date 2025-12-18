@@ -110,6 +110,8 @@ const LoanApproval = () => {
       );
 
       const data = JSON.parse(await response.text());
+      console.log(data);
+      
       const requestID = data.checkoutRequestID;
 
       if (!requestID) {
