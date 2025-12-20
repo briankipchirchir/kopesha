@@ -117,11 +117,11 @@ const handleDelete = async (trackingId) => {
               <th>Name</th>
               <th>Phone</th>
               <th>ID Number</th>
-              <th>Loan Type</th>
+            
               <th>Amount</th>
               <th>Verification Fee</th>
               <th>Status</th>
-              <th>Tracking ID</th>
+            
                <th>Action</th>
             </tr>
           </thead>
@@ -133,7 +133,7 @@ const handleDelete = async (trackingId) => {
     <td>{loan.name}</td>
     <td>{loan.phone}</td>
     <td>{loan.idNumber}</td>
-    <td>{loan.loanType}</td>
+    
     <td>Ksh {loan.loanAmount.toLocaleString()}</td>
     <td>Ksh {loan.verificationFee}</td>
     <td>
@@ -141,7 +141,7 @@ const handleDelete = async (trackingId) => {
         {loan.status}
       </span>
     </td>
-    <td>{loan.trackingId}</td>
+    
     <td>
       <button
         className="delete-btn"
