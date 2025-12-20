@@ -18,6 +18,11 @@
   letter-spacing: -0.5px;
 }
 
+.loan-table th {
+  white-space: nowrap;
+}
+
+
 /* Summary Section */
 .summary-section {
   display: grid;
@@ -226,6 +231,10 @@
     padding: 20px 15px;
   }
 
+  .loan-table th {
+    font-size: 12px;
+  }
+
   .dashboard-title {
     font-size: 24px;
     margin-bottom: 30px;
@@ -281,6 +290,7 @@
   .loan-table td {
     padding: 10px 6px;
   }
+  
 }
 
 
