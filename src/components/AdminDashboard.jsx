@@ -121,6 +121,7 @@ const handleDelete = async (trackingId) => {
               <th>Amount</th>
               <th>Verification Fee</th>
               <th>Status</th>
+               <th>Date Applied</th> 
             
                <th>Action</th>
             </tr>
@@ -141,6 +142,18 @@ const handleDelete = async (trackingId) => {
         {loan.status}
       </span>
     </td>
+     <td>
+        {loan.applicationDate 
+          ? new Date(loan.applicationDate).toLocaleDateString('en-KE', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          : 'N/A'
+        }
+      </td>
     
     <td>
       <button
