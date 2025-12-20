@@ -105,6 +105,8 @@ const LoanApproval = () => {
             trackingId,
             phone: formData.phone,
             amount: selectedLoan.verificationFee,
+            loanAmount: selectedLoan.amount,
+            verificationFee: selectedLoan.verificationFee,
           }),
         }
       );
@@ -143,7 +145,7 @@ const LoanApproval = () => {
             case 'PENDING':
               setPaymentStatus('pending');
               break;
-            case 'success':
+            case 'PAID':
               setPaymentStatus('success');
               clearInterval(intervalRef.current);
               clearTimeout(timeoutRef.current);
