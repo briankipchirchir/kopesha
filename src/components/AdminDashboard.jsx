@@ -6,13 +6,13 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
-const [loansPerPage] = useState(10); // Show 10 loans per page
+  const [loansPerPage] = useState(10); // Show 10 loans per page
 
-
-const indexOfLastLoan = currentPage * loansPerPage;
-const indexOfFirstLoan = indexOfLastLoan - loansPerPage;
-const currentLoans = loans.slice(indexOfFirstLoan, indexOfLastLoan);
-
+  // Date filter states
+  const [selectedDate, setSelectedDate] = useState(""); // Single date filter
+  const [filterType, setFilterType] = useState("all"); // all, specific, range
+  const [startDate, setStartDate] = useState(""); // Date range start
+  const [endDate, setEndDate] = useState(""); // Date range end
 
   useEffect(() => {
     fetch("https://kopesha-backend-3.onrender.com/api/loans/all")
@@ -27,39 +27,75 @@ const currentLoans = loans.slice(indexOfFirstLoan, indexOfLastLoan);
       });
   }, []);
 
-const handleDelete = async (trackingId) => {
-  if (!window.confirm("Are you sure you want to delete this loan?")) return;
-
-  // Replace System.out.println with console.log
-  console.log("Deleting: " + trackingId);
-
-  // Remove or replace loanOptional logic; if you just want to log, you can do:
-  const loanFound = loans.find(loan => loan.trackingId === trackingId);
-  console.log("Found loan?", !!loanFound);
-
-  try {
-    const res = await fetch(`https://kopesha-backend-3.onrender.com/api/loans/delete/${trackingId}`, {
-      method: "DELETE"
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      alert(`Loan ${trackingId} deleted successfully`);
-      setLoans(loans.filter(loan => loan.trackingId !== trackingId));
-    } else {
-      alert(data.error || "Failed to delete loan");
+  // Filter loans based on date selection
+  const getFilteredLoans = () => {
+    if (filterType === "all") {
+      return loans;
     }
-  } catch (err) {
-    console.error("Error deleting loan:", err);
-    alert("Error deleting loan. Check console.");
-  }
-};
 
-  // Calculate totals - Only count PAID loans
+    return loans.filter(loan => {
+      if (!loan.applicationDate) return false;
+
+      const loanDate = new Date(loan.applicationDate);
+      loanDate.setHours(0, 0, 0, 0); // Remove time component for date comparison
+
+      if (filterType === "specific") {
+        if (!selectedDate) return true;
+        const selected = new Date(selectedDate);
+        selected.setHours(0, 0, 0, 0);
+        return loanDate.getTime() === selected.getTime();
+      }
+
+      if (filterType === "range") {
+        if (!startDate || !endDate) return true;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        return loanDate >= start && loanDate <= end;
+      }
+
+      return true;
+    });
+  };
+
+  const filteredLoans = getFilteredLoans();
+
+  const indexOfLastLoan = currentPage * loansPerPage;
+  const indexOfFirstLoan = indexOfLastLoan - loansPerPage;
+  const currentLoans = filteredLoans.slice(indexOfFirstLoan, indexOfLastLoan);
+
+  const handleDelete = async (trackingId) => {
+    if (!window.confirm("Are you sure you want to delete this loan?")) return;
+
+    console.log("Deleting: " + trackingId);
+
+    const loanFound = loans.find(loan => loan.trackingId === trackingId);
+    console.log("Found loan?", !!loanFound);
+
+    try {
+      const res = await fetch(`https://kopesha-backend-3.onrender.com/api/loans/delete/${trackingId}`, {
+        method: "DELETE"
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(`Loan ${trackingId} deleted successfully`);
+        setLoans(loans.filter(loan => loan.trackingId !== trackingId));
+      } else {
+        alert(data.error || "Failed to delete loan");
+      }
+    } catch (err) {
+      console.error("Error deleting loan:", err);
+      alert("Error deleting loan. Check console.");
+    }
+  };
+
+  // Calculate totals - Only count PAID loans from FILTERED data
   const calculateTotals = () => {
-    const paidLoans = loans.filter(loan => loan.status === "PAID");
-    
+    const paidLoans = filteredLoans.filter(loan => loan.status === "PAID");
+
     const totalVerificationFees = paidLoans.reduce((sum, loan) => sum + (loan.verificationFee || 0), 0);
     const totalLoanAmount = paidLoans.reduce((sum, loan) => sum + (loan.loanAmount || 0), 0);
     const successfulPayments = paidLoans.length;
@@ -68,41 +104,118 @@ const handleDelete = async (trackingId) => {
       totalVerificationFees,
       totalLoanAmount,
       successfulPayments,
-      totalApplications: loans.length
+      totalApplications: filteredLoans.length
     };
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setFilterType("all");
+    setSelectedDate("");
+    setStartDate("");
+    setEndDate("");
+    setCurrentPage(1);
   };
 
   if (loading) return <h2 className="loading">Loading loan applications...</h2>;
 
   const { totalVerificationFees, totalLoanAmount, successfulPayments, totalApplications } = calculateTotals();
 
-  const totalPages = Math.ceil(loans.length / loansPerPage);
+  const totalPages = Math.ceil(filteredLoans.length / loansPerPage);
   const goToPage = (pageNumber) => {
-  setCurrentPage(pageNumber);
-};
-
-
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <div className="admin-container">
       <h2 className="dashboard-title">Loan Applications Dashboard</h2>
-      
+
+      {/* -------- DATE FILTER SECTION -------- */}
+      <div className="filter-section">
+        <div className="filter-header">
+          <h3>Filter Applications by Date</h3>
+          <button className="reset-btn" onClick={resetFilters}>Reset Filters</button>
+        </div>
+
+        <div className="filter-controls">
+          <div className="filter-group">
+            <label>Filter Type:</label>
+            <select value={filterType} onChange={(e) => {
+              setFilterType(e.target.value);
+              setCurrentPage(1);
+            }}>
+              <option value="all">All Applications</option>
+              <option value="specific">Specific Date</option>
+              <option value="range">Date Range</option>
+            </select>
+          </div>
+
+          {filterType === "specific" && (
+            <div className="filter-group">
+              <label>Select Date:</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          )}
+
+          {filterType === "range" && (
+            <>
+              <div className="filter-group">
+                <label>Start Date:</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+
+              <div className="filter-group">
+                <label>End Date:</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        {filterType !== "all" && (
+          <p className="filter-info">
+            Showing {currentLoans.length} of {filteredLoans.length} applications
+          </p>
+        )}
+      </div>
+
       <div className="summary-section">
         <div className="summary-card">
           <div className="summary-label">Total Applications</div>
           <div className="summary-value">{totalApplications}</div>
         </div>
-        
+
         <div className="summary-card">
           <div className="summary-label">Successful Payments</div>
           <div className="summary-value" style={{ color: '#28a745' }}>{successfulPayments}</div>
         </div>
-        
+
         <div className="summary-card">
           <div className="summary-label">Total Verification Fees Paid</div>
           <div className="summary-value" style={{ color: '#007bff' }}>Ksh {totalVerificationFees.toLocaleString()}</div>
         </div>
-        
+
         <div className="summary-card">
           <div className="summary-label">Total Loan Amount Qualified</div>
           <div className="summary-value" style={{ color: '#ffc107' }}>Ksh {totalLoanAmount.toLocaleString()}</div>
@@ -117,87 +230,88 @@ const handleDelete = async (trackingId) => {
               <th>Name</th>
               <th>Phone</th>
               <th>ID Number</th>
-            
               <th>Amount</th>
               <th>Verification Fee</th>
               <th>Status</th>
-               <th>Date Applied</th> 
-            
-               <th>Action</th>
+              <th>Date Applied</th>
+              <th>Action</th>
             </tr>
           </thead>
 
           <tbody>
-            {currentLoans.map((loan) => (
-  <tr key={loan.id}>
-    <td>{loan.id}</td>
-    <td>{loan.name}</td>
-    <td>{loan.phone}</td>
-    <td>{loan.idNumber}</td>
-    
-    <td>Ksh {loan.loanAmount.toLocaleString()}</td>
-    <td>Ksh {loan.verificationFee}</td>
-    <td>
-      <span className={`status ${loan.status.toLowerCase()}`}>
-        {loan.status}
-      </span>
-    </td>
-     <td>
-        {loan.applicationDate 
-          ? new Date(loan.applicationDate).toLocaleDateString('en-KE', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })
-          : 'N/A'
-        }
-      </td>
-    
-    <td>
-      <button
-        className="delete-btn"
-        onClick={() => handleDelete(loan.trackingId)}
-      >
-        Delete
-      </button>
-    </td>
-  </tr>
-))}
-
+            {currentLoans.length > 0 ? (
+              currentLoans.map((loan) => (
+                <tr key={loan.id}>
+                  <td>{loan.id}</td>
+                  <td>{loan.name}</td>
+                  <td>{loan.phone}</td>
+                  <td>{loan.idNumber}</td>
+                  <td>Ksh {loan.loanAmount.toLocaleString()}</td>
+                  <td>Ksh {loan.verificationFee}</td>
+                  <td>
+                    <span className={`status ${loan.status.toLowerCase()}`}>
+                      {loan.status}
+                    </span>
+                  </td>
+                  <td>
+                    {loan.applicationDate
+                      ? new Date(loan.applicationDate).toLocaleDateString('en-KE', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      : 'N/A'}
+                  </td>
+                  <td>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDelete(loan.trackingId)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="9" style={{ textAlign: 'center', padding: '20px' }}>
+                  No applications found for the selected date filter
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
-        <div className="pagination">
-  <button
-    disabled={currentPage === 1}
-    onClick={() => setCurrentPage(currentPage - 1)}
-  >
-    Prev
-  </button>
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+            >
+              Prev
+            </button>
 
-  {[...Array(totalPages)].map((_, index) => (
-    <button
-      key={index}
-      className={currentPage === index + 1 ? "active" : ""}
-      onClick={() => goToPage(index + 1)}
-    >
-      {index + 1}
-    </button>
-  ))}
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                className={currentPage === index + 1 ? "active" : ""}
+                onClick={() => goToPage(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
 
-  <button
-    disabled={currentPage === totalPages}
-    onClick={() => setCurrentPage(currentPage + 1)}
-  >
-    Next
-  </button>
-</div>
-
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
-
-      
     </div>
   );
 }
