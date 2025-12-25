@@ -140,6 +140,7 @@ const LoanApproval = () => {
           if (!statusRes.ok) return;
 
           const statusData = await statusRes.json();
+          console.log("MPESA STATUS RESPONSE:", statusData);
 
           switch (statusData.status) {
             case 'PENDING':
