@@ -31,17 +31,39 @@ const trackingId = loanApplication?.trackingId;
   const tillNumber = '7973629';
   const accountName = 'Jovial Jones';
 
-  const handleProceedToPayment = () => {
-    if (!selectedLoan) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Oops!',
-        text: 'Please select a loan option first.',
-      });
-      return;
+  const handleProceedToPayment = async () => {
+  if (!selectedLoan) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Oops!',
+      text: 'Please select a loan option first.',
+    });
+    return;
+  }
+
+  // ✅ Save selected loan offer to backend
+  try {
+    const res = await fetch("https://kopesha-backend-3.onrender.com/api/loans/update-offer", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        trackingId: trackingId,
+        loanAmount: selectedLoan.amount,
+        verificationFee: selectedLoan.verificationFee
+      })
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Failed to save loan offer");
     }
-    setShowTillInfo(true);
-  };
+
+    setShowTillInfo(true); // now show till info after saving
+  } catch (err) {
+    Swal.fire("Error", err.message, "error");
+  }
+};
+
 
   const handleCopyTill = () => {
     navigator.clipboard.writeText(tillNumber)
