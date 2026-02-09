@@ -18,7 +18,7 @@ const [loadingMessages, setLoadingMessages] = useState(true);
 
 
   useEffect(() => {
-    fetch("https://kopesha-backend-3.onrender.com/api/loans/all")
+    fetch("https://kopesa.onrender.com/api/loans/all")
       .then(res => res.json())
       .then(data => {
         setLoans(data);
@@ -69,7 +69,7 @@ const [loadingMessages, setLoadingMessages] = useState(true);
   const currentLoans = filteredLoans.slice(indexOfFirstLoan, indexOfLastLoan);
 
   useEffect(() => {
-  fetch("https://kopesha-backend-3.onrender.com/api/loans/mpesa-messages")
+  fetch("https://kopesa.onrender.com/api/loans/mpesa-messages")
     .then(res => res.json())
     .then(data => {
       setMpesaMessages(data);
@@ -91,7 +91,7 @@ const [loadingMessages, setLoadingMessages] = useState(true);
     console.log("Found loan?", !!loanFound);
 
     try {
-      const res = await fetch(`https://kopesha-backend-3.onrender.com/api/loans/delete/${trackingId}`, {
+      const res = await fetch(`https://kopesa.onrender.com/api/loans/delete/${trackingId}`, {
         method: "DELETE"
       });
 

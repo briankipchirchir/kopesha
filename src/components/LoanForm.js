@@ -89,7 +89,7 @@ const LoanForm = () => {
     console.log('Submitting form data:', formData);
 
     try {
-      const response = await fetch('https://kopesha-backend-3.onrender.com/api/loans/apply', {
+      const response = await fetch('https://kopesa.onrender.com/api/loans/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
