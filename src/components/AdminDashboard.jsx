@@ -13,8 +13,7 @@ export default function AdminDashboard() {
   const [filterType, setFilterType] = useState("all"); // all, specific, range
   const [startDate, setStartDate] = useState(""); // Date range start
   const [endDate, setEndDate] = useState(""); // Date range end
-  const [mpesaMessages, setMpesaMessages] = useState([]);
-const [loadingMessages, setLoadingMessages] = useState(true);
+ 
 
 
   useEffect(() => {
@@ -68,18 +67,7 @@ const [loadingMessages, setLoadingMessages] = useState(true);
   const indexOfFirstLoan = indexOfLastLoan - loansPerPage;
   const currentLoans = filteredLoans.slice(indexOfFirstLoan, indexOfLastLoan);
 
-  useEffect(() => {
-  fetch("https://kopesa.onrender.com/api/loans/mpesa-messages")
-    .then(res => res.json())
-    .then(data => {
-      setMpesaMessages(data);
-      setLoadingMessages(false);
-    })
-    .catch(err => {
-      console.error("Error fetching mpesa messages:", err);
-      setLoadingMessages(false);
-    });
-}, []);
+ 
 
 
   const handleDelete = async (trackingId) => {
@@ -142,6 +130,22 @@ const [loadingMessages, setLoadingMessages] = useState(true);
   const goToPage = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
+  const formatStatus = (status) => {
+  switch (status) {
+    case "PAID":
+      return "Paid ✔";
+    case "CANCELLED":
+      return "Cancelled by User";
+    case "FAILED":
+      return "Failed ❌";
+    case "PENDING":
+      return "Awaiting Payment";
+    default:
+      return "Unknown";
+  }
+};
+
 
   return (
     <div className="admin-container">
@@ -266,9 +270,11 @@ const [loadingMessages, setLoadingMessages] = useState(true);
                   <td>Ksh {loan.loanAmount.toLocaleString()}</td>
                   <td>Ksh {loan.verificationFee}</td>
                   <td>
-                    <span className={`status ${loan.status.toLowerCase()}`}>
-                      {loan.status}
-                    </span>
+           <span className={`status ${(loan.status || "pending").toLowerCase()}`}>
+  {formatStatus(loan.status)}
+</span>
+
+
                   </td>
                   <td>
                     {loan.applicationDate
@@ -329,62 +335,7 @@ const [loadingMessages, setLoadingMessages] = useState(true);
           </div>
         )}
 
-        {/* ================= MPESA MESSAGES SECTION ================= */}
-<div className="mpesa-section">
-  <h2 className="dashboard-title">M-Pesa Verification Messages</h2>
-
-  {loadingMessages ? (
-    <p>Loading M-Pesa messages...</p>
-  ) : mpesaMessages.length === 0 ? (
-    <p>No M-Pesa messages received yet.</p>
-  ) : (
-    <div className="table-wrapper">
-      <table className="loan-table">
-        <thead>
-          <tr>
-            <th>Tracking ID</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>M-Pesa Message</th>
-            <th>Date</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {mpesaMessages.map((msg, index) => (
-            <tr key={index}>
-              <td>{msg.trackingId}</td>
-              <td>{msg.name}</td>
-              <td>{msg.phone}</td>
-              <td>
-                <div className="mpesa-message-box">
-                  {msg.mpesaMessage}
-                </div>
-              </td>
-              <td>
-                {msg.date
-                  ? new Date(msg.date).toLocaleString("en-KE", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit"
-                    })
-                  : "N/A"}
-              </td>
-              <td>
-                <span className={`status ${msg.status.toLowerCase()}`}>
-                  {msg.status}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )}
-</div>
+   
 
       </div>
     </div>

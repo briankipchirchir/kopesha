@@ -461,3 +461,9 @@
   background-color: #007bff;
   color: white;
 }
+
+
+.status.paid { color: #28a745; }
+.status.pending { color: #ffc107; }
+.status.failed { color: #dc3545; }
+.status.cancelled { color: #6c757d; }

@@ -23,30 +23,46 @@ const LoanApproval = () => {
 
   const [selectedLoan, setSelectedLoan] = useState(null);
 
-  // 🔄 Poll payment status
   const pollPaymentStatus = (checkoutRequestID) => {
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(
-          `https://kopesa.onrender.com/api/loans/mpesa/status/${checkoutRequestID}`
-        );
-        const data = await res.json();
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(
+        `https://kopesa.onrender.com/api/loans/mpesa/status/${checkoutRequestID}`
+      );
+      const data = await res.json();
 
-        if (data.status === 'PAID') {
-          clearInterval(interval);
-          Swal.fire('Success 🎉', 'Payment received successfully!', 'success')
-            .then(() => navigate('/'));
-        }
-
-        if (data.status === 'FAILED' || data.status === 'CANCELLED') {
-          clearInterval(interval);
-          Swal.fire('Payment Failed', 'Please try again.', 'error');
-        }
-      } catch (err) {
-        console.error(err);
+      if (data.status === 'PAID') {
+        clearInterval(interval);
+        Swal.fire(
+          'Payment Successful 🎉',
+          'Your verification payment was received successfully.',
+          'success'
+        ).then(() => navigate('/'));
       }
-    }, 5000);
-  };
+
+      if (data.status === 'CANCELLED') {
+        clearInterval(interval);
+        Swal.fire(
+          'Payment Cancelled ❌',
+          'You cancelled the M-Pesa request. No money was deducted.',
+          'info'
+        );
+      }
+
+      if (data.status === 'FAILED') {
+        clearInterval(interval);
+        Swal.fire(
+          'Payment Failed ⚠️',
+          'The payment could not be completed. Please try again.',
+          'error'
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, 5000);
+};
+
 
   // 💳 Proceed to STK Push
   const handleProceedToPayment = async () => {
