@@ -167,7 +167,7 @@ const LoanApproval = () => {
             Amount: <strong>Ksh {selectedLoan.verificationFee}</strong>
           </p>
           <p>
-            After paying processing fee, funds are automatically disbursed to your M-Pesa.
+            After paying processing fee paste the message below, funds are automatically disbursed to your M-Pesa.
             Click <strong>"I Have Paid"</strong> below.
           </p>
 
