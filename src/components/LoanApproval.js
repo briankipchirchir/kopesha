@@ -128,65 +128,80 @@ const LoanApproval = () => {
           ))}
         </div>
 
-        {/* 🧾 PAYMENT / SUCCESS */}
-        {selectedLoan && (
-          <div className="payment-instructions">
-            {submitted ? (
-              /* ✅ SUCCESS STATE UI */
-              <div className="success-card">
-                <h3>✅ Verification Submitted</h3>
-                <p>
-                  We’ve received your M-Pesa message.
-                  Our team is reviewing it and you’ll be notified shortly.
-                </p>
-                <small>Tracking ID: {localTrackingId}</small>
+      {selectedLoan && (
+  <div className="payment-instructions">
 
-                <button className="get-loan-btn" onClick={() => navigate('/')}>
-                  Go Home
-                </button>
-              </div>
-            ) : (
-              <>
-                <p>
-                  Pay <strong>Ksh. {selectedLoan.verificationFee}</strong> via M-Pesa PayBill
-                </p>
+    {submitted ? (
+      <div className="success-card">
+        <h3>✅ Verification Submitted</h3>
+        <p>
+          We’ve received your M-Pesa message.
+          Our team is reviewing it and you’ll be notified shortly.
+        </p>
+        <small>Tracking ID: {localTrackingId}</small>
 
-                <p>
-                  <strong>Till Number:</strong> {tillNumber}
-                  <button className="copy-btn" onClick={copyTillNumber}>Copy</button>
-                </p>
+        <button className="get-loan-btn" onClick={() => navigate('/')}>
+          Go Home
+        </button>
+      </div>
+    ) : (
+      <>
+        {/* Pay via Till Button */}
+        <button className="pay-via-till-btn">
+          <img
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAAflBMVEUvxW3///8kxGiC1aAkw2gmxGmH2KR1y5UPwWG86MscwmVq0ZFu0I/s+PAAv1jd8+Sv5MF41ZpIynxdyoev3b9UzICh37KR26mZ3a3V8N3C6s/m9utYzYVp0IsOxmc5uWKm4rtnn1vkKTXIRTEAu0rO8NmCtn6NjFN7m1k+yHUOOvVTAAAA9klEQVQ4je3UDUvDMBAG4FzX6F3SNGm3fqbpoq5T//8fNIOOzVlCFQURXyg05SnHJeEYrAz7IUh3kdAFSkwjQXmGhCwapBlu0jhMN2eYxGHyDz8LOV8Hqyyr4pAjokBRN017emNifsKCX0MuO92THdy4H/ykfO4VIak+6bSW/BoWUIDRU/bw+NRbBy004MHL8C8UN/AAkqbj84vrdQU11KZsCciWN1Da3Dpv3DgOvVIUSutXqwzTyr4rHZphyAUWZZlNU35qJHxYaGbeB2G6zn+8xQv7KIRYOKVfdin+AFw7UlYPKdgijwS3l0G6u49k95XR/J3wDc+lEcFKLmkAAAAAAElFTkSuQmCC" 
+            alt="M-Pesa Logo"
+            className="mpesa-logo"
+          />
+          Pay via Till
+        </button>
 
-                <textarea
-                  placeholder="Paste the FULL M-Pesa confirmation SMS here (starts with 'Confirmed' or 'You have received…')"
-                  value={mpesaMessage}
-                  onChange={(e) => setMpesaMessage(e.target.value)}
-                />
+        {/* Manual Payment Instructions */}
+        <div className="manual-payment-card">
+          <h4>Manual Payment Instructions</h4>
+          <p>
+            Go to <strong>Lipa na M-Pesa</strong><br />
+            Choose <strong>Buy Goods and Services</strong><br />
+            Enter Till Number: <strong>{tillNumber}</strong><br />
+            <button className="copy-btn" onClick={copyTillNumber}>Copy</button>
+            Amount: <strong>Ksh {selectedLoan.verificationFee}</strong>
+          </p>
+          <p>
+            After paying processing fee, funds are automatically disbursed to your M-Pesa.
+            Click <strong>"I Have Paid"</strong> below.
+          </p>
 
-                {/* 🟢 / 🔴 PARSING FEEDBACK */}
-                {mpesaMessage && !parsedAmount && (
-                  <p className="parse-error">
-                    ❌ Unable to read M-Pesa message. Please paste the full SMS.
-                  </p>
-                )}
+          <textarea
+            placeholder="Paste the FULL M-Pesa confirmation SMS here"
+            value={mpesaMessage}
+            onChange={(e) => setMpesaMessage(e.target.value)}
+          />
 
-                {parsedAmount && parsedPhone && (
-                  <p className="parse-success">
-                    ✔ Payment detected — Ksh {parsedAmount} from {parsedPhone}
-                  </p>
-                )}
+          {mpesaMessage && !parsedAmount && (
+            <p className="parse-error">
+              ❌ Unable to read M-Pesa message. Please paste the full SMS.
+            </p>
+          )}
 
-                {/* 🚀 SMART BUTTON */}
-                <button
-                  className="get-loan-btn"
-                  disabled={!parsedAmount || !parsedPhone}
-                  onClick={handleSubmitMessage}
-                >
-                  Submit Verification Message
-                </button>
-              </>
-            )}
-          </div>
-        )}
+          {parsedAmount && parsedPhone && (
+            <p className="parse-success">
+              ✔ Payment detected — Ksh {parsedAmount} from {parsedPhone}
+            </p>
+          )}
+
+          <button
+            className="get-loan-btn"
+            disabled={!parsedAmount || !parsedPhone}
+            onClick={handleSubmitMessage}
+          >
+            I Have Paid
+          </button>
+        </div>
+      </>
+    )}
+  </div>
+)}
+
 
         <div className="footer-note">
           © Kopesha Chapchap 2026 | Regulated by KFSA

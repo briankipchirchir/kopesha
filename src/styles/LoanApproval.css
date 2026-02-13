@@ -251,3 +251,63 @@
   font-size: 0.9rem;
   color: #555;
 }
+
+/* Pay via Till Button */
+.pay-via-till-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 0;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 15px;
+  transition: all 0.2s ease;
+}
+
+.pay-via-till-btn:hover {
+  background-color: #45a049;
+}
+
+.mpesa-logo {
+  width: 24px;
+  height: 24px;
+}
+
+/* Manual Payment Card */
+.manual-payment-card {
+  background: #fff7e6;
+  border: 1px solid #ffd580;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.manual-payment-card h4 {
+  margin-bottom: 10px;
+  color: #c97f00;
+  text-align: center;
+}
+
+.manual-payment-card p {
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.manual-payment-card textarea {
+  width: 100%;
+  min-height: 80px;
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
