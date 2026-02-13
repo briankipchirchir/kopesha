@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import PhoneMockup from './PhoneMockup';
 import LoanForm from './LoanForm';
 import '../styles/LoanHomepage.css';
+import { useNavigate } from "react-router-dom";
 
 const LoanHomepage = () => {
   const [applications, setApplications] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+    const navigate = useNavigate();
 
   // Fetch latest 10 applications
   useEffect(() => {
@@ -42,7 +44,8 @@ const LoanHomepage = () => {
 
           <PhoneMockup />
 
-          <h1 className="loan-heading">Kopesha Loan</h1>
+          <h1 className="loan-heading"          onClick={() => navigate("/admin-login")} // <-- admin login route
+        style={{ cursor: "pointer" }} >Kopesha Loan</h1>
           <p className="loan-description">
             Let us help you sort your expenses - top up a loan, rental loan, car loan or emergencies
           </p>

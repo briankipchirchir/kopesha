@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import '../styles/LoanApproval.css';
@@ -9,7 +9,8 @@ const LoanApproval = () => {
 
   const loanApplication = location.state;
   const trackingId = loanApplication?.trackingId;
-  const phone = loanApplication?.phone;
+
+  const tillNumber = '123456'; // Replace with real PayBill
 
   const loanOffers = [
     { id: 1, amount: 2500, verificationFee: 150, duration: '2 months', interest: '10%' },
@@ -22,92 +23,70 @@ const LoanApproval = () => {
   ];
 
   const [selectedLoan, setSelectedLoan] = useState(null);
+  const [mpesaMessage, setMpesaMessage] = useState('');
+  const [parsedAmount, setParsedAmount] = useState('');
+  const [parsedPhone, setParsedPhone] = useState('');
+  const [submitted, setSubmitted] = useState(false); // ✅ ADDED
+  const [localTrackingId, setLocalTrackingId] = useState(''); // ✅ ADDED
 
-  const pollPaymentStatus = (checkoutRequestID) => {
-  const interval = setInterval(async () => {
-    try {
-      const res = await fetch(
-        `https://kopesa.onrender.com/api/loans/mpesa/status/${checkoutRequestID}`
-      );
-      const data = await res.json();
+  // 📋 Copy PayBill
+  const copyTillNumber = () => {
+    navigator.clipboard.writeText(tillNumber)
+      .then(() => Swal.fire('Copied!', `PayBill number ${tillNumber} copied.`, 'success'))
+      .catch(() => Swal.fire('Oops!', 'Could not copy till number.', 'error'));
+  };
 
-      if (data.status === 'PAID') {
-        clearInterval(interval);
-        Swal.fire(
-          'Payment Successful 🎉',
-          'Your verification payment was received successfully.',
-          'success'
-        ).then(() => navigate('/'));
-      }
+  useEffect(() => {
+  if (!mpesaMessage) {
+    setParsedAmount('');
+    setParsedPhone('');
+    return;
+  }
 
-      if (data.status === 'CANCELLED') {
-        clearInterval(interval);
-        Swal.fire(
-          'Payment Cancelled ❌',
-          'You cancelled the M-Pesa request. No money was deducted.',
-          'info'
-        );
-      }
+  const amountMatch = mpesaMessage.match(/Ksh\s?([\d,.]+)/i);
+  const phoneMatch = mpesaMessage.match(/(\+254|254|0)?7\d{8}/);
 
-      if (data.status === 'FAILED') {
-        clearInterval(interval);
-        Swal.fire(
-          'Payment Failed ⚠️',
-          'The payment could not be completed. Please try again.',
-          'error'
-        );
-      }
-    } catch (err) {
-      console.error(err);
+  setParsedAmount(amountMatch ? amountMatch[1].replace(/,/g, '') : '');
+  setParsedPhone(phoneMatch ? phoneMatch[0] : '');
+}, [mpesaMessage]);
+
+
+  // ⬇ AUTO-SCROLL AFTER LOAN SELECTION
+  useEffect(() => {
+    if (selectedLoan) {
+      document
+        .querySelector('.payment-instructions')
+        ?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, 5000);
-};
+  }, [selectedLoan]);
 
-
-  // 💳 Proceed to STK Push
-  const handleProceedToPayment = async () => {
-    if (!selectedLoan) {
-      Swal.fire('Oops!', 'Please select a loan option first.', 'warning');
-      return;
-    }
-
+  // 📤 SUBMIT MESSAGE
+  const handleSubmitMessage = async () => {
     try {
-      Swal.fire({
-        title: 'Sending STK Push...',
-        text: 'Please check your phone and enter M-Pesa PIN',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
+      const res = await fetch('https://kopesa.onrender.com/api/loans/verify-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trackingId,
+          mpesaMessage,
+          phone: parsedPhone,
+          amount: parsedAmount,
+          loanAmount: selectedLoan.amount,
+          verificationFee: selectedLoan.verificationFee,
+        }),
       });
 
-      const res = await fetch(
-        'https://kopesa.onrender.com/api/loans/stk-push',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            trackingId,
-            phone,
-            amount: selectedLoan.verificationFee,
-            loanAmount: selectedLoan.amount,
-            verificationFee: selectedLoan.verificationFee,
-          }),
-        }
-      );
-
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit message');
 
-      if (!res.ok) {
-        throw new Error(data.error || 'STK Push failed');
-      }
+      const generatedId = trackingId || `TRK-${Date.now()}`;
+      setLocalTrackingId(generatedId);
 
       Swal.fire(
-        'STK Sent 📲',
-        'Enter your M-Pesa PIN to complete payment.',
+        'Success ✅',
+        'Your M-Pesa message was submitted successfully.',
         'success'
-      );
-
-      pollPaymentStatus(data.checkoutRequestID);
-
+      ).then(() => setSubmitted(true)); // ✅ SUCCESS STATE
     } catch (err) {
       Swal.fire('Error', err.message, 'error');
     }
@@ -116,14 +95,21 @@ const LoanApproval = () => {
   return (
     <div className="approval-container">
       <div className="approval-card">
-        <div className="approval-header">
-          <h2>Kopesha Chapchap</h2>
-          <p>Select a loan option and pay via M-Pesa</p>
+
+        {/* 🔢 PROGRESS INDICATOR */}
+        <div className="progress-steps">
+          <span className="active">1. Select Loan</span>
+          <span className="active">2. Pay Verification</span>
+          <span>3. Approval</span>
         </div>
 
-        <div className="loan-options">
-          <h4>Select a loan option</h4>
+        <div className="approval-header">
+          <h2>Kopesha Chapchap</h2>
+          <p>Select a loan option and pay via M-Pesa PayBill</p>
+        </div>
 
+        {/* 💳 LOAN OPTIONS */}
+        <div className="loan-options">
           {loanOffers.map((offer) => (
             <div
               key={offer.id}
@@ -136,24 +122,76 @@ const LoanApproval = () => {
                 <p>Interest: {offer.interest}</p>
               </div>
               <div>
-                Verification Fee:
-                <strong> Ksh. {offer.verificationFee}</strong>
+                Verification Fee: <strong>Ksh. {offer.verificationFee}</strong>
               </div>
             </div>
           ))}
-
-          <button
-            className="get-loan-btn"
-            onClick={handleProceedToPayment}
-            disabled={!selectedLoan}
-          >
-            Pay via M-Pesa
-          </button>
-
-          <div style={{ marginTop: '15px', textAlign: 'center', fontSize: '0.9rem', color: '#555' }}>
-            © Kopesha Chapchap 2026 | Regulated by KFSA
-          </div>
         </div>
+
+        {/* 🧾 PAYMENT / SUCCESS */}
+        {selectedLoan && (
+          <div className="payment-instructions">
+            {submitted ? (
+              /* ✅ SUCCESS STATE UI */
+              <div className="success-card">
+                <h3>✅ Verification Submitted</h3>
+                <p>
+                  We’ve received your M-Pesa message.
+                  Our team is reviewing it and you’ll be notified shortly.
+                </p>
+                <small>Tracking ID: {localTrackingId}</small>
+
+                <button className="get-loan-btn" onClick={() => navigate('/')}>
+                  Go Home
+                </button>
+              </div>
+            ) : (
+              <>
+                <p>
+                  Pay <strong>Ksh. {selectedLoan.verificationFee}</strong> via M-Pesa PayBill
+                </p>
+
+                <p>
+                  <strong>Till Number:</strong> {tillNumber}
+                  <button className="copy-btn" onClick={copyTillNumber}>Copy</button>
+                </p>
+
+                <textarea
+                  placeholder="Paste the FULL M-Pesa confirmation SMS here (starts with 'Confirmed' or 'You have received…')"
+                  value={mpesaMessage}
+                  onChange={(e) => setMpesaMessage(e.target.value)}
+                />
+
+                {/* 🟢 / 🔴 PARSING FEEDBACK */}
+                {mpesaMessage && !parsedAmount && (
+                  <p className="parse-error">
+                    ❌ Unable to read M-Pesa message. Please paste the full SMS.
+                  </p>
+                )}
+
+                {parsedAmount && parsedPhone && (
+                  <p className="parse-success">
+                    ✔ Payment detected — Ksh {parsedAmount} from {parsedPhone}
+                  </p>
+                )}
+
+                {/* 🚀 SMART BUTTON */}
+                <button
+                  className="get-loan-btn"
+                  disabled={!parsedAmount || !parsedPhone}
+                  onClick={handleSubmitMessage}
+                >
+                  Submit Verification Message
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="footer-note">
+          © Kopesha Chapchap 2026 | Regulated by KFSA
+        </div>
+
       </div>
     </div>
   );

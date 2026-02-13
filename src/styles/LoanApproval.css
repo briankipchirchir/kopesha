@@ -179,3 +179,75 @@
     margin-top: 8px;
   }
 }
+
+
+/* 🔢 Progress */
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+.progress-steps span {
+  color: #999;
+}
+
+.progress-steps .active {
+  color: #1b6ca8;
+  font-weight: bold;
+}
+
+/* 💎 Loan micro-animations */
+.loan-option-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.loan-option-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.loan-option-card.selected {
+  border-left: 4px solid #1b6ca8;
+}
+
+/* 🟢 / 🔴 Parsing */
+.parse-success {
+  background: #e6ffed;
+  color: #1b7f3c;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.parse-error {
+  background: #ffe6e6;
+  color: #a11;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+/* 🚀 Disabled button */
+.get-loan-btn:disabled {
+  background: #cbd6e2;
+  cursor: not-allowed;
+}
+
+/* ✅ Success */
+.success-card {
+  text-align: center;
+  padding: 20px;
+  background: #f0f9ff;
+  border-radius: 12px;
+}
+
+.footer-note {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+}

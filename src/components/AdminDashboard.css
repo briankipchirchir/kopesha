@@ -467,3 +467,16 @@
 .status.pending { color: #ffc107; }
 .status.failed { color: #dc3545; }
 .status.cancelled { color: #6c757d; }
+
+
+
+/* 📩 Messages table tweaks */
+.loan-table td {
+  vertical-align: top;
+}
+
+.loan-table td:nth-child(4) {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
