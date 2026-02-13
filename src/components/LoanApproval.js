@@ -10,7 +10,7 @@ const LoanApproval = () => {
   const loanApplication = location.state;
   const trackingId = loanApplication?.trackingId;
 
-  const tillNumber = '123456'; // Replace with real PayBill
+  const tillNumber = '9179737'; 
 
   const loanOffers = [
     { id: 1, amount: 2500, verificationFee: 150, duration: '2 months', interest: '10%' },
