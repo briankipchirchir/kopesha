@@ -46,12 +46,12 @@ export default function AdminDashboard() {
   // ------------------- Fetch Messages -------------------
   const fetchMessages = async () => {
     try {
-      const res = await fetch("https://kopesa.onrender.com/api/messages/all");
+      const res = await fetch("https://kopesa.onrender.com/api/loans/mpesa-messages");
       const data = await res.json();
       setMessages(data);
 
       // Show alert if new message arrived
-      const lastMessageId = data[data.length - 1]?.id;
+      const lastMessageId = data[data.length - 1]?.trackingId;
       if (lastMessageId && lastMessageId !== prevLastMessageId.current) {
         if (prevLastMessageId.current !== null) {
           Swal.fire("New Message Received", "A user just sent a message", "info");
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchMessages();
-    const interval = setInterval(fetchMessages, 10000); // poll every 10s
+    const interval = setInterval(fetchMessages, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -162,8 +162,8 @@ export default function AdminDashboard() {
     if (messageFilterType === "all") return messages;
 
     return messages.filter((msg) => {
-      if (!msg.timestamp) return false;
-      const msgDate = new Date(msg.timestamp);
+      if (!msg.date) return false; // ✅ Changed from msg.timestamp to msg.date
+      const msgDate = new Date(msg.date);
       msgDate.setHours(0, 0, 0, 0);
 
       if (messageFilterType === "specific") {
@@ -191,8 +191,15 @@ export default function AdminDashboard() {
   const currentMessages = filteredMessages.slice(indexOfFirstMessage, indexOfLastMessage);
   const messageTotalPages = Math.ceil(filteredMessages.length / messagesPerPage);
 
+  // ✅ Extract amount from mpesaMessage
+  const extractAmount = (mpesaMessage) => {
+    if (!mpesaMessage) return 0;
+    const match = mpesaMessage.match(/Ksh\s?([\d,.]+)/i);
+    return match ? parseFloat(match[1].replace(/,/g, '')) : 0;
+  };
+
   const totalMessageAmount = filteredMessages.reduce(
-    (sum, msg) => sum + (msg.amount || 0),
+    (sum, msg) => sum + extractAmount(msg.mpesaMessage),
     0
   );
 
@@ -211,7 +218,6 @@ export default function AdminDashboard() {
       </div>
 
       <button className="reset-btn" onClick={resetLoanFilters}>Reset Loan Filters</button>
-
 
       {/* -------- Loan Table -------- */}
       <div className="table-wrapper">
@@ -336,28 +342,36 @@ export default function AdminDashboard() {
         <table className="loan-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>Tracking ID</th>
+              <th>Name</th>
               <th>Phone</th>
               <th>Amount (Ksh)</th>
-              <th>Message</th>
+              <th>M-Pesa Message</th>
+              <th>Status</th>
               <th>Received At</th>
             </tr>
           </thead>
           <tbody>
             {currentMessages.length > 0 ? (
               currentMessages.map((msg) => (
-                <tr key={msg.id}>
-                  <td>{msg.id}</td>
+                <tr key={msg.trackingId}>
+                  <td>{msg.trackingId}</td>
+                  <td>{msg.name || "N/A"}</td>
                   <td>{msg.phone || "N/A"}</td>
                   <td style={{ fontWeight: "bold", color: "#28a745" }}>
-                    {msg.amount ? msg.amount.toLocaleString() : "N/A"}
+                    {extractAmount(msg.mpesaMessage).toLocaleString()}
                   </td>
                   <td style={{ maxWidth: "350px", whiteSpace: "normal" }}>
-                    {msg.content}
+                    {msg.mpesaMessage}
                   </td>
                   <td>
-                    {msg.timestamp
-                      ? new Date(msg.timestamp).toLocaleString("en-KE", {
+                    <span className={`status ${(msg.status||"pending").toLowerCase()}`}>
+                      {formatStatus(msg.status)}
+                    </span>
+                  </td>
+                  <td>
+                    {msg.date
+                      ? new Date(msg.date).toLocaleString("en-KE", {
                           year: "numeric",
                           month: "short",
                           day: "numeric",
@@ -370,7 +384,7 @@ export default function AdminDashboard() {
               ))
             ) : (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
+                <td colSpan="7" style={{ textAlign: "center", padding: "20px" }}>
                   No messages received yet
                 </td>
               </tr>
