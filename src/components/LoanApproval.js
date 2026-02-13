@@ -32,7 +32,7 @@ const LoanApproval = () => {
   // 📋 Copy PayBill
   const copyTillNumber = () => {
     navigator.clipboard.writeText(tillNumber)
-      .then(() => Swal.fire('Copied!', `PayBill number ${tillNumber} copied.`, 'success'))
+      .then(() => Swal.fire('Copied!', `Till number ${tillNumber} copied.`, 'success'))
       .catch(() => Swal.fire('Oops!', 'Could not copy till number.', 'error'));
   };
 
