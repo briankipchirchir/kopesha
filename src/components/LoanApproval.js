@@ -191,7 +191,7 @@ const LoanApproval = () => {
 
           <button
             className="get-loan-btn"
-            disabled={!parsedAmount || !parsedPhone}
+            
             onClick={handleSubmitMessage}
           >
             I Have Paid
