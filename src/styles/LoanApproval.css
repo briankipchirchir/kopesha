@@ -311,3 +311,28 @@
   resize: vertical;
 }
 
+
+/* Recent Loans Ticker */
+.loan-ticker {
+  height: 200px; /* adjust height */
+  overflow: hidden;
+  margin: 20px 0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+.recent-loan {
+  padding: 10px 15px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  background: linear-gradient(to right, #f0f5ff, #f5f7fa);
+  transition: transform 0.3s;
+}
+
+.recent-loan:last-child {
+  border-bottom: none;
+}

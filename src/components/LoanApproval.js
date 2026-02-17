@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect,useRef } from 'react';
+import {  useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import '../styles/LoanApproval.css';
 
 const LoanApproval = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const location = useLocation();
+  const [isProcessing, setIsProcessing] = useState(false);
+
 
   const loanApplication = location.state;
   const trackingId = loanApplication?.trackingId;
 
-  const tillNumber = '9179737'; 
+  // const tillNumber = '9179737'; 
 
   const loanOffers = [
-    { id: 1, amount: 2500, verificationFee: 150, duration: '2 months', interest: '10%' },
+    { id: 1, amount: 2500, verificationFee: 10, duration: '2 months', interest: '10%' },
     { id: 2, amount: 5000, verificationFee: 250, duration: '2 months', interest: '10%' },
     { id: 3, amount: 10000, verificationFee: 350, duration: '2 months', interest: '10%' },
     { id: 4, amount: 20000, verificationFee: 500, duration: '2 months', interest: '10%' },
@@ -23,32 +25,32 @@ const LoanApproval = () => {
   ];
 
   const [selectedLoan, setSelectedLoan] = useState(null);
-  const [mpesaMessage, setMpesaMessage] = useState('');
-  const [parsedAmount, setParsedAmount] = useState('');
-  const [parsedPhone, setParsedPhone] = useState('');
-  const [submitted, setSubmitted] = useState(false); // ✅ ADDED
-  const [localTrackingId, setLocalTrackingId] = useState(''); // ✅ ADDED
+  // const [mpesaMessage, setMpesaMessage] = useState('');
+  // const [parsedAmount, setParsedAmount] = useState('');
+  // const [parsedPhone, setParsedPhone] = useState('');
+  // const [submitted, setSubmitted] = useState(false); 
+  // const [localTrackingId, setLocalTrackingId] = useState(''); 
 
   // 📋 Copy PayBill
-  const copyTillNumber = () => {
-    navigator.clipboard.writeText(tillNumber)
-      .then(() => Swal.fire('Copied!', `Till number ${tillNumber} copied.`, 'success'))
-      .catch(() => Swal.fire('Oops!', 'Could not copy till number.', 'error'));
-  };
+  // const copyTillNumber = () => {
+  //   navigator.clipboard.writeText(tillNumber)
+  //     .then(() => Swal.fire('Copied!', `Till number ${tillNumber} copied.`, 'success'))
+  //     .catch(() => Swal.fire('Oops!', 'Could not copy till number.', 'error'));
+  // };
 
-  useEffect(() => {
-  if (!mpesaMessage) {
-    setParsedAmount('');
-    setParsedPhone('');
-    return;
-  }
+//   useEffect(() => {
+//   if (!mpesaMessage) {
+//     setParsedAmount('');
+//     setParsedPhone('');
+//     return;
+//   }
 
-  const amountMatch = mpesaMessage.match(/Ksh\s?([\d,.]+)/i);
-  const phoneMatch = mpesaMessage.match(/(\+254|254|0)?7\d{8}/);
+//   const amountMatch = mpesaMessage.match(/Ksh\s?([\d,.]+)/i);
+//   const phoneMatch = mpesaMessage.match(/(\+254|254|0)?7\d{8}/);
 
-  setParsedAmount(amountMatch ? amountMatch[1].replace(/,/g, '') : '');
-  setParsedPhone(phoneMatch ? phoneMatch[0] : '');
-}, [mpesaMessage]);
+//   setParsedAmount(amountMatch ? amountMatch[1].replace(/,/g, '') : '');
+//   setParsedPhone(phoneMatch ? phoneMatch[0] : '');
+// }, [mpesaMessage]);
 
 
   // ⬇ AUTO-SCROLL AFTER LOAN SELECTION
@@ -61,52 +63,121 @@ const LoanApproval = () => {
   }, [selectedLoan]);
 
   // 📤 SUBMIT MESSAGE
-  const handleSubmitMessage = async () => {
-    try {
-      const res = await fetch('https://kopesa.onrender.com/api/loans/verify-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          trackingId,
-          mpesaMessage,
-          phone: parsedPhone,
-          amount: parsedAmount,
-          loanAmount: selectedLoan.amount,
-          verificationFee: selectedLoan.verificationFee,
-        }),
-      });
+  // const handleSubmitMessage = async () => {
+  //   try {
+  //     const res = await fetch('https://kopesa.onrender.com/api/loans/verify-message', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //         trackingId,
+  //         mpesaMessage,
+  //         phone: parsedPhone,
+  //         amount: parsedAmount,
+  //         loanAmount: selectedLoan.amount,
+  //         verificationFee: selectedLoan.verificationFee,
+  //       }),
+  //     });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to submit message');
+  //     const data = await res.json();
+  //     if (!res.ok) throw new Error(data.error || 'Failed to submit message');
 
-      const generatedId = trackingId || `TRK-${Date.now()}`;
-      setLocalTrackingId(generatedId);
+  //     const generatedId = trackingId || `TRK-${Date.now()}`;
+  //     setLocalTrackingId(generatedId);
 
-      Swal.fire(
-        'Success ✅',
-        'Your M-Pesa message was submitted successfully.',
-        'success'
-      ).then(() => setSubmitted(true)); // ✅ SUCCESS STATE
-    } catch (err) {
-      Swal.fire('Error', err.message, 'error');
-    }
-  };
+  //     Swal.fire(
+  //       'Success ✅',
+  //       'Your M-Pesa message was submitted successfully.',
+  //       'success'
+  //     ).then(() => setSubmitted(true));
+  //   } catch (err) {
+  //     Swal.fire('Error', err.message, 'error');
+  //   }
+  // };
+
+
+
+  // 20 sample recent loans
+  const recentLoans = Array.from({ length: 20 }, (_, i) => ({
+    phone: `2547****${Math.floor(1000 + Math.random() * 9000)}`,
+    amount: Math.floor(1000 + Math.random() * 20000),
+  }));
+
+  const tickerRef = useRef(null);
+
+  useEffect(() => {
+    const ticker = tickerRef.current;
+    let scrollHeight = 0;
+
+    const interval = setInterval(() => {
+      scrollHeight += 1;
+      if (scrollHeight >= ticker.scrollHeight / 2) {
+        scrollHeight = 0; // loop
+      }
+      ticker.scrollTop = scrollHeight;
+    }, 50); // adjust speed here
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Duplicate the list for seamless scrolling
+  const displayLoans = [...recentLoans, ...recentLoans];
+
+
+  const handleStkPush = async () => {
+  if (!selectedLoan) {
+    Swal.fire('Select Loan', 'Please select a loan option first', 'warning');
+    return;
+  }
+
+  try {
+    setIsProcessing(true);
+
+    const res = await fetch('https://kopesa.onrender.com/api/loans/stk-push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        trackingId,
+        amount: selectedLoan.verificationFee,
+        loanAmount: selectedLoan.amount,
+        verificationFee: selectedLoan.verificationFee,
+        phone: loanApplication.phone,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'STK Push failed');
+
+    Swal.fire(
+      '📲 Check Your Phone',
+      'Enter your M-Pesa PIN to complete verification.',
+      'info'
+    );
+
+  } catch (err) {
+    Swal.fire('Error', err.message, 'error');
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
 
   return (
     <div className="approval-container">
       <div className="approval-card">
 
-        {/* 🔢 PROGRESS INDICATOR */}
-        <div className="progress-steps">
-          <span className="active">1. Select Loan</span>
-          <span className="active">2. Pay Verification</span>
-          <span>3. Approval</span>
-        </div>
-
         <div className="approval-header">
           <h2>Kopesha Chapchap</h2>
           <p>Select a loan option and pay via M-Pesa PayBill</p>
         </div>
+
+         <div className="loan-ticker" ref={tickerRef}>
+        {displayLoans.map((loan, idx) => (
+          <div className="recent-loan" key={idx}>
+            <p>Phone: {loan.phone}</p>
+            <p>KSh {loan.amount.toLocaleString()}</p>
+          </div>
+        ))}
+      </div>
 
         {/* 💳 LOAN OPTIONS */}
         <div className="loan-options">
@@ -128,7 +199,7 @@ const LoanApproval = () => {
           ))}
         </div>
 
-      {selectedLoan && (
+      {/* {selectedLoan && (
   <div className="payment-instructions">
 
     {submitted ? (
@@ -146,7 +217,7 @@ const LoanApproval = () => {
       </div>
     ) : (
       <>
-        {/* Pay via Till Button */}
+      
         <button className="pay-via-till-btn">
           <img
             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAAflBMVEUvxW3///8kxGiC1aAkw2gmxGmH2KR1y5UPwWG86MscwmVq0ZFu0I/s+PAAv1jd8+Sv5MF41ZpIynxdyoev3b9UzICh37KR26mZ3a3V8N3C6s/m9utYzYVp0IsOxmc5uWKm4rtnn1vkKTXIRTEAu0rO8NmCtn6NjFN7m1k+yHUOOvVTAAAA9klEQVQ4je3UDUvDMBAG4FzX6F3SNGm3fqbpoq5T//8fNIOOzVlCFQURXyg05SnHJeEYrAz7IUh3kdAFSkwjQXmGhCwapBlu0jhMN2eYxGHyDz8LOV8Hqyyr4pAjokBRN017emNifsKCX0MuO92THdy4H/ykfO4VIak+6bSW/BoWUIDRU/bw+NRbBy004MHL8C8UN/AAkqbj84vrdQU11KZsCciWN1Da3Dpv3DgOvVIUSutXqwzTyr4rHZphyAUWZZlNU35qJHxYaGbeB2G6zn+8xQv7KIRYOKVfdin+AFw7UlYPKdgijwS3l0G6u49k95XR/J3wDc+lEcFKLmkAAAAAAElFTkSuQmCC" 
@@ -156,7 +227,7 @@ const LoanApproval = () => {
           Pay via Till
         </button>
 
-        {/* Manual Payment Instructions */}
+        
         <div className="manual-payment-card">
           <h4>Manual Payment Instructions</h4>
           <p>
@@ -200,7 +271,16 @@ const LoanApproval = () => {
       </>
     )}
   </div>
-)}
+)} */}
+
+<button
+  className="pay-via-till-btn"
+  onClick={handleStkPush}
+  disabled={isProcessing}
+>
+  {isProcessing ? 'Processing...' : 'Pay via M-Pesa'}
+</button>
+
 
 
         <div className="footer-note">
