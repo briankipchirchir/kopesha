@@ -167,7 +167,7 @@ const LoanApproval = () => {
 
         <div className="approval-header">
           <h2>Kopesha Chapchap</h2>
-          <p>Select a loan option and pay via M-Pesa PayBill</p>
+          <p>Select a loan option and pay </p>
         </div>
 
          <div className="loan-ticker" ref={tickerRef}>
