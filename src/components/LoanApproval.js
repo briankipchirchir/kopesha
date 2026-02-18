@@ -7,10 +7,15 @@ const LoanApproval = () => {
   // const navigate = useNavigate();
   const location = useLocation();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
 
-  const loanApplication = location.state;
-  const trackingId = loanApplication?.trackingId;
+
+   const loanApplication = location.state || {};
+
+  const trackingId = loanApplication.trackingId || null;
+
+
 
   // const tillNumber = '9179737'; 
 
@@ -185,7 +190,11 @@ const LoanApproval = () => {
             <div
               key={offer.id}
               className={`loan-option-card ${selectedLoan?.id === offer.id ? 'selected' : ''}`}
-              onClick={() => setSelectedLoan(offer)}
+              onClick={() => {
+  setSelectedLoan(offer);
+  setShowModal(true);
+}}
+
             >
               <div>
                 <strong>Ksh. {offer.amount.toLocaleString()}</strong>
@@ -288,6 +297,54 @@ const LoanApproval = () => {
         </div>
 
       </div>
+
+
+      {showModal && selectedLoan && (
+  <div className="modal-overlay">
+    <div className="modal-card">
+      <h2 className="modal-title">🎉 Congratulations!</h2>
+
+      <p className="modal-subtitle">
+        You qualify for a loan of
+      </p>
+
+      <h1 className="qualified-amount">
+        KSh {selectedLoan.amount.toLocaleString()}
+      </h1>
+
+      <div className="modal-details">
+        <p><strong>Duration:</strong> {selectedLoan.duration}</p>
+        <p><strong>Interest:</strong> {selectedLoan.interest}</p>
+        <p><strong>Verification Fee:</strong> KSh {selectedLoan.verificationFee}</p>
+
+        <hr />
+<p><strong>Name:</strong> {loanApplication.name || 'N/A'}</p>
+<p><strong>Phone:</strong> {loanApplication.phone || 'N/A'}</p>
+<p><strong>ID Number:</strong> {loanApplication.idNumber || 'N/A'}</p>
+<p><strong>Tracking ID:</strong> {loanApplication.trackingId || 'N/A'}</p>
+
+
+      </div>
+
+      <button
+        className="pay-via-till-btn"
+        onClick={handleStkPush}
+        disabled={isProcessing}
+      >
+        {isProcessing ? 'Processing...' : 'Pay verification fee via M-Pesa'}
+      </button>
+
+      <button
+        className="close-btn"
+        onClick={() => setShowModal(false)}
+        disabled={isProcessing}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

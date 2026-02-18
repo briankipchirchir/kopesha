@@ -96,7 +96,15 @@ const LoanForm = () => {
       });
 
       const data = await response.json();
-      navigate('/approval', { state: data });
+      navigate('/approval', {
+  state: {
+    ...data,          // backend response (trackingId, loan info, etc.)
+    name: formData.name,
+    phone: formData.phone,
+    idNumber: formData.idNumber
+  }
+});
+
     } catch (err) {
       console.error('Error submitting loan:', err);
     }
