@@ -337,13 +337,13 @@ const LoanApproval = () => {
         {isProcessing ? 'Processing...' : 'Pay verification fee via M-Pesa'}
       </button>
 
-      <button
+      {/* <button
         className="close-btn"
         onClick={() => setShowModal(false)}
         disabled={isProcessing}
       >
         Cancel
-      </button>
+      </button> */}
     </div>
   </div>
 )}
