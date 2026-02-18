@@ -157,6 +157,7 @@ const LoanApproval = () => {
       'Enter your M-Pesa PIN to complete verification.',
       'info'
     );
+    setShowModal(false);
 
   } catch (err) {
     Swal.fire('Error', err.message, 'error');

@@ -412,3 +412,7 @@
     max-width: 100%;
   }
 }
+/* ===== SWEETALERT2 ON TOP OF MODAL ===== */
+.swal2-container {
+  z-index: 99999 !important;
+}
