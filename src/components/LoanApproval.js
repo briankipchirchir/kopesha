@@ -175,6 +175,8 @@ const LoanApproval = () => {
           <p>Select a loan option and pay </p>
         </div>
 
+<div className="recent-approved-loans">
+   <h3 className="recent-title">✅ Recent Disbursed Loans</h3>
          <div className="loan-ticker" ref={tickerRef}>
         {displayLoans.map((loan, idx) => (
           <div className="recent-loan" key={idx}>
@@ -182,6 +184,7 @@ const LoanApproval = () => {
             <p>KSh {loan.amount.toLocaleString()}</p>
           </div>
         ))}
+      </div>
       </div>
 
         {/* 💳 LOAN OPTIONS */}
